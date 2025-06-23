@@ -7,8 +7,8 @@ const public_users = express.Router();
 
 public_users.post("/register", (req, res) => {
     // empty username and/or password
-    const username = req.body.username.trim();
-    const password = req.body.password.trim();
+    const username = (req.body.username || "").trim();
+    const password = (req.body.password || "").trim();
     if (username === "" || password === "") {
         return res.send("Username and password must not be blank");
     }
@@ -20,6 +20,7 @@ public_users.post("/register", (req, res) => {
 
     // valid registration
     users.push({"username": username, "password": password});
+    //console.log(users);
     return res.send("Registration successful!");
 });
 
@@ -40,33 +41,25 @@ public_users.get('/isbn/:isbn', function (req, res) {
 // Get book details based on author
 public_users.get('/author/:author', function (req, res) {
     const author = req.params.author;
-    const selectedBookKeys = Object.keys(books).filter(key =>
-        books[key]["author"] === author);
-    let selectedBooks = {};
-    selectedBookKeys.forEach(key => {
-        selectedBooks = { ...selectedBooks, [key]: books[key] }
-    });
-
-    if (selectedBookKeys.length == 0) {
+    const selectedBooks = Object.fromEntries(
+        Object.entries(books).filter(([key, book]) => book.author === author
+    ));
+    if (Object.keys(selectedBooks).length == 0) {
         return res.send(`No books available by author: ${author}`);
     }
-    res.send(JSON.stringify(selectedBooks, null, 4));
+    return res.send(JSON.stringify(selectedBooks, null, 4));
 });
 
 // Get all books based on title
 public_users.get('/title/:title', function (req, res) {
     const title = req.params.title;
-    const selectedBookKeys = Object.keys(books).filter(key =>
-        books[key]["title"] === title);
-    let selectedBooks = {};
-    selectedBookKeys.forEach(key => {
-        selectedBooks = { ...selectedBooks, [key]: books[key] }
-    });
-
-    if (selectedBookKeys.length == 0) {
+    const selectedBooks = Object.fromEntries(
+        Object.entries(books).filter(([key, book]) => book.title === title
+    ));
+    if (Object.keys(selectedBooks).length == 0) {
         return res.send(`No books available with title: ${title}`);
     }
-    res.send(JSON.stringify(selectedBooks, null, 4));
+    return res.send(JSON.stringify(selectedBooks, null, 4));
 });
 
 //  Get book review

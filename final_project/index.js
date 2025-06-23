@@ -12,6 +12,7 @@ app.use("/customer",session({secret:"fingerprint_customer",resave: true, saveUni
 
 app.use("/customer/auth/*", function auth(req, res, next) {
     // Check if session contains auth info
+    console.log(req.session.authorization);
     if (!req.session || !req.session.authorization || !req.session.authorization.accessToken) {
         return res.status(403).json({ error: "User not logged in" });
     }
