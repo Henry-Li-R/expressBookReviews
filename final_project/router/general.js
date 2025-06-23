@@ -25,13 +25,29 @@ public_users.post("/register", (req, res) => {
 });
 
 // Get the book list available in the shop
-public_users.get('/', function (req, res) {
-    return res.send(JSON.stringify(books, null, 4));
+public_users.get('/', async function (req, res) {
+    // books is a synchronous in-memory object;
+    // there's no need for async operation
+    // the code below which uses await is for demonstration only
+    try {
+        const bookList = await Promise.resolve(books);
+        return res.send(JSON.stringify(bookList, null, 4));
+    } catch (err) {
+        return res.status(500).send("Error fetching book list");
+    }
+    
+    
 });
 
 // Get book details based on ISBN
-public_users.get('/isbn/:isbn', function (req, res) {
-    const book = books[req.params.isbn]
+public_users.get('/isbn/:isbn', async function (req, res) {
+    try {
+        books = await Promise.resolve(books);
+    } catch (err) {
+        return res.status(500).send("Error fetching book list");
+    }
+    
+    const book = books[req.params.isbn];
     if (!book) {
         return res.send(`No book matches with ISBN: ${req.params.isbn}`)
     }
@@ -39,7 +55,13 @@ public_users.get('/isbn/:isbn', function (req, res) {
 });
 
 // Get book details based on author
-public_users.get('/author/:author', function (req, res) {
+public_users.get('/author/:author', async function (req, res) {
+    try {
+        books = await Promise.resolve(books);
+    } catch (err) {
+        return res.status(500).send("Error fetching book list");
+    }
+
     const author = req.params.author;
     const selectedBooks = Object.fromEntries(
         Object.entries(books).filter(([key, book]) => book.author === author
@@ -51,7 +73,13 @@ public_users.get('/author/:author', function (req, res) {
 });
 
 // Get all books based on title
-public_users.get('/title/:title', function (req, res) {
+public_users.get('/title/:title', async function (req, res) {
+    try {
+        books = await Promise.resolve(books);
+    } catch (err) {
+        return res.status(500).send("Error fetching book list");
+    }
+
     const title = req.params.title;
     const selectedBooks = Object.fromEntries(
         Object.entries(books).filter(([key, book]) => book.title === title
